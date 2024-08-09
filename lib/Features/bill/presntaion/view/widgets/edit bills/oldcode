@@ -1,0 +1,471 @@
+// // ignore_for_file: use_build_context_synchronously
+
+// import 'dart:convert';
+
+// import 'package:dio/dio.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_spinkit/flutter_spinkit.dart';
+// import 'package:shamseenfactory/Features/bill/presntaion/view/widgets/edit_bill.dart';
+// import 'package:http/http.dart' as http;
+
+// // Update this import to the correct path
+// import 'package:shamseenfactory/constants.dart';
+// import 'package:shamseenfactory/core/utils/styles.dart';
+// import 'package:shamseenfactory/core/utils/widgets/custom_text.dart';
+
+// class SchooleditDetailsScreen extends StatefulWidget {
+//   final School school;
+
+//   const SchooleditDetailsScreen({
+//     required this.school,
+//   });
+
+//   @override
+//   State<SchooleditDetailsScreen> createState() =>
+//       _SchooleditDetailsScreenState();
+// }
+
+// class _SchooleditDetailsScreenState extends State<SchooleditDetailsScreen> {
+//   @override
+//   int? newAmount;
+//   int? originalAmount;
+//   List<int> selectedCategoryIds = [];
+//   bool isloadingD = false;
+//   bool isLoading = false;
+//   bool isEditing = false; // De
+//   Map<int, bool> isEditingAmountMap =
+//       {}; // Map to track whether an amount is being edited
+//   // Future<void> editCategoryAmount(
+//   Future<void> editCategoryAmount(int categoryID, int newAmount) async {
+//     Dio dio = Dio();
+//     var data = {
+//       "amount": newAmount,
+//     };
+//     print(data);
+//     print(categoryID);
+//     try {
+//       var response = await dio.post('$baseUrl/bill/category/update/$categoryID',
+//           data: data);
+//       print(response.statusCode);
+//       print(categoryID);
+//       if (response.statusCode == 200) {
+//         // Handle successful response if needed
+//         print('Category amount edited successfully by dio');
+//       } else {
+//         print(response.statusCode);
+//         print('Error editing category amount: ${response.data.toString()}');
+//       }
+//     } catch (e) {
+//       print(e);
+//     }
+//   }
+
+//   void removeDeletedCategories(List<int> deletedCategoryIds) {
+//     for (int categoryId in deletedCategoryIds) {
+//       for (SellPoint sellPoint in widget.school.sellPoints) {
+//         for (Bill bill in sellPoint.bills) {
+//           bill.billCategories
+//               .removeWhere((category) => category.id == categoryId);
+//         }
+//       }
+//     }
+//   }
+
+//   Future<void> deleteSelectedCategories(List<int> categoryIds) async {
+//     final url = Uri.parse('$baseUrl/bill/category/delete');
+//     final body = jsonEncode({
+//       "bill_category_ids": categoryIds,
+//     });
+
+//     final response = await http.delete(url,
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: body);
+//     print(response.statusCode);
+//     print(body);
+
+//     if (response.statusCode == 200) {
+//       print('Selected categories deleted successfully');
+//       // Handle UI updates or any other necessary actions
+//     } else {
+//       print('Failed to delete selected categories: ${response.reasonPhrase}');
+//     }
+//   }
+
+//   Future<void> deleteCategory(int categoryId) async {
+//     final url = Uri.parse('$baseUrl/bill/category/delete');
+//     final body = jsonEncode({
+//       "bill_category_ids": [categoryId]
+//     });
+
+//     final response = await http.delete(url,
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: body);
+//     print("form dlete");
+//     print(body);
+
+//     print(response.statusCode);
+
+//     if (response.statusCode == 200) {
+//       print('Category deleted successfully');
+//       // Handle UI updates or any other necessary actions
+//     } else {
+//       print('Failed to delete category: ${response.reasonPhrase}');
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         backgroundColor: kBlueLightColor,
+//         title: const Text('School Details'),
+//       ),
+//       body: Padding(
+//         padding: const EdgeInsets.all(16.0),
+//         child: SingleChildScrollView(
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               CustomText(data: 'School Name: ${widget.school.nameAr}'),
+//               // Text(
+//               //   'School Name: ${school.nameAr}', // Displaying school's Arabic name
+//               //   style:
+//               //       const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+//               // ),
+//               const SizedBox(height: 10),
+//               Text('School ID: ${widget.school.id}'),
+//               const SizedBox(height: 10),
+//               Text('User: ${widget.school.region}'),
+//               const SizedBox(height: 10),
+//               Text('type: ${widget.school.type}'),
+//               const SizedBox(height: 20),
+//               const CustomText(data: 'Sell Points:'),
+//               // const Text(
+//               //   'Sell Points:',
+//               //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+//               // ),
+//               Column(
+//                 children: widget.school.sellPoints.map((sellPoint) {
+//                   return Card(
+//                     margin: const EdgeInsetsDirectional.all(10),
+//                     child: Padding(
+//                       padding: const EdgeInsetsDirectional.all(10),
+//                       child: Column(
+//                         crossAxisAlignment: CrossAxisAlignment.start,
+//                         children: [
+//                           Text('Sell Point Name: ${sellPoint.name}'),
+//                           Text('Total: ${sellPoint.total}'),
+//                           Text("Total Quantity: ${sellPoint.total_quantity}"),
+//                           if (sellPoint.bills.isNotEmpty)
+//                             const SizedBox(height: 10),
+//                           const Text(
+//                             'Bills:',
+//                             style: TextStyle(
+//                                 fontSize: 16, fontWeight: FontWeight.bold),
+//                           ),
+//                           Column(
+//                             children: sellPoint.bills.map((bill) {
+//                               return Padding(
+//                                 padding:
+//                                     const EdgeInsets.symmetric(vertical: 5),
+//                                 child: Column(
+//                                   crossAxisAlignment: CrossAxisAlignment.start,
+//                                   children: [
+//                                     Text(
+//                                       'Bill #${bill.id}',
+//                                     ),
+//                                     // Text('Total: ${bill.total}'),
+//                                     // Text('Total Quantity: ${bill.total_quantity}'),
+//                                     const SizedBox(height: 5),
+//                                     const Text(
+//                                       'Bill Categories:',
+//                                       style: TextStyle(
+//                                         fontSize: 14,
+//                                         fontWeight: FontWeight.bold,
+//                                       ),
+//                                     ),
+//                                     Column(
+//                                       crossAxisAlignment:
+//                                           CrossAxisAlignment.start,
+//                                       children:
+//                                           bill.billCategories.map((category) {
+//                                         final isEditingAmount =
+//                                             isEditingAmountMap[category.id] ??
+//                                                 false;
+//                                         final isSelected = selectedCategoryIds
+//                                             .contains(category.id);
+//                                         return Padding(
+//                                           padding: const EdgeInsets.symmetric(
+//                                               vertical: 2),
+//                                           child: Column(
+//                                             crossAxisAlignment:
+//                                                 CrossAxisAlignment.start,
+//                                             children: [
+//                                               Row(
+//                                                 children: [
+//                                                   Checkbox(
+//                                                     value: isSelected,
+//                                                     onChanged: (bool? value) {
+//                                                       setState(() {
+//                                                         if (value == true) {
+//                                                           selectedCategoryIds
+//                                                               .add(category.id);
+//                                                         } else {
+//                                                           selectedCategoryIds
+//                                                               .remove(
+//                                                                   category.id);
+//                                                         }
+//                                                       });
+//                                                     },
+//                                                   ),
+//                                                   Text(
+//                                                       'Category Name: \n ${category.category.nameAr}'),
+//                                                 ],
+//                                               ),
+//                                               const SizedBox(
+//                                                 height: 15,
+//                                               ),
+//                                               Row(
+//                                                 mainAxisAlignment:
+//                                                     MainAxisAlignment
+//                                                         .spaceBetween,
+//                                                 children: [
+//                                                   if (!isEditingAmount)
+//                                                     Text(
+//                                                         'Amount: ${category.amount}')
+//                                                   else
+//                                                     Container(
+//                                                       width: 30,
+//                                                       child: TextFormField(
+//                                                         keyboardType:
+//                                                             TextInputType
+//                                                                 .number,
+//                                                         initialValue: category
+//                                                             .amount
+//                                                             .toString(),
+//                                                         onChanged: (value) {
+//                                                           setState(() {
+//                                                             category.amount =
+//                                                                 int.tryParse(
+//                                                                         value) ??
+//                                                                     0;
+//                                                           });
+//                                                         },
+//                                                       ),
+//                                                     ),
+//                                                   Row(
+//                                                     children: [
+//                                                       if (isEditingAmount)
+//                                                         ElevatedButton(
+//                                                           onPressed: () async {
+//                                                             setState(() {
+//                                                               isEditingAmountMap[
+//                                                                       category
+//                                                                           .id] =
+//                                                                   false;
+//                                                               // If the user cancels the edit, revert the category's amount back to the original value
+//                                                               category.amount =
+//                                                                   originalAmount!;
+//                                                             });
+//                                                           },
+//                                                           child: Text(
+//                                                             'Cancel',
+//                                                           ),
+//                                                         ),
+//                                                       SizedBox(
+//                                                         width: 7,
+//                                                       ),
+//                                                       Stack(
+//                                                         alignment:
+//                                                             Alignment.center,
+//                                                         children: [
+//                                                           ElevatedButton(
+//                                                             onPressed:
+//                                                                 () async {
+//                                                               originalAmount =
+//                                                                   category
+//                                                                       .amount;
+//                                                               print(
+//                                                                   originalAmount);
+//                                                               if (isEditingAmount) {
+//                                                                 setState(() {
+//                                                                   isLoading =
+//                                                                       true;
+//                                                                 });
+//                                                                 await editCategoryAmount(
+//                                                                     category.id,
+//                                                                     category
+//                                                                         .amount);
+
+//                                                                 setState(() {
+//                                                                   isEditingAmountMap[
+//                                                                           category
+//                                                                               .id] =
+//                                                                       false;
+//                                                                   isLoading =
+//                                                                       false;
+//                                                                 });
+//                                                               } else {
+//                                                                 setState(() {
+//                                                                   originalAmount =
+//                                                                       category
+//                                                                           .amount;
+//                                                                   isEditingAmountMap[
+//                                                                       category
+//                                                                           .id] = true;
+//                                                                 });
+//                                                               }
+//                                                             },
+//                                                             child: Text(
+//                                                                 isEditingAmount
+//                                                                     ? 'Save'
+//                                                                     : 'Edit Amount'),
+//                                                           ),
+//                                                           if (isLoading)
+//                                                             SpinKitSpinningLines(
+//                                                               size: 50,
+//                                                               color:
+//                                                                   hBackgroundColor,
+//                                                             ) // Replace this with your loading indicator widget
+//                                                         ],
+//                                                       )
+//                                                     ],
+//                                                   ),
+//                                                 ],
+//                                               ),
+//                                               Row(
+//                                                 children: [
+//                                                   Text(
+//                                                       'Total Price: ${category.totalPrice}'),
+//                                                 ],
+//                                               ),
+//                                               const Divider()
+//                                             ],
+//                                           ),
+//                                         );
+//                                       }).toList(),
+//                                     ),
+//                                     ElevatedButton(
+//                                       onPressed: () async {
+//                                         if (selectedCategoryIds.isNotEmpty) {
+//                                           bool confirmDelete = await showDialog(
+//                                             context: context,
+//                                             builder: (BuildContext context) {
+//                                               return AlertDialog(
+//                                                 title: Text('Confirm Deletion'),
+//                                                 content: Text(
+//                                                     'Are you sure you want to delete the selected categories?'),
+//                                                 actions: <Widget>[
+//                                                   TextButton(
+//                                                     onPressed: () {
+//                                                       Navigator.of(context).pop(
+//                                                           true); // Confirmed deletion
+//                                                     },
+//                                                     // ignore: prefer_const_constructors
+//                                                     child: Text('Yes'),
+//                                                   ),
+//                                                   TextButton(
+//                                                     onPressed: () {
+//                                                       Navigator.of(context).pop(
+//                                                           false); // Cancelled deletion
+//                                                     },
+//                                                     // ignore: prefer_const_constructors
+//                                                     child: Text('No'),
+//                                                   ),
+//                                                 ],
+//                                               );
+//                                             },
+//                                           );
+//                                           await deleteSelectedCategories(
+//                                               selectedCategoryIds);
+
+//                                           if (confirmDelete == true) {
+//                                             setState(() {
+//                                               isloadingD = true;
+//                                             });
+//                                             await deleteSelectedCategories(
+//                                                 selectedCategoryIds);
+//                                             removeDeletedCategories(
+//                                                 selectedCategoryIds); // Remove deleted categories from the state
+//                                             setState(() {
+//                                               isloadingD =
+//                                                   false; // Hide loading indicator
+//                                               selectedCategoryIds.clear();
+//                                             });
+//                                             showDialog(
+//                                                 context: context,
+//                                                 builder:
+//                                                     (BuildContext context) {
+//                                                   return AlertDialog(
+//                                                       title: Text('Success'),
+//                                                       content: Text(
+//                                                           'Categories deleted successfully.'),
+//                                                       actions: <Widget>[
+//                                                         TextButton(
+//                                                           onPressed: () {
+//                                                             Navigator.of(
+//                                                                     context)
+//                                                                 .pop(); // Close the dialog
+//                                                           },
+//                                                           child: Text('OK'),
+//                                                         )
+//                                                       ]);
+//                                                 });
+//                                             // Show a success dialog or handle other updates
+//                                           }
+//                                         } else if (selectedCategoryIds
+//                                             .isEmpty) {
+//                                           showDialog(
+//                                             context: context,
+//                                             builder: (BuildContext context) {
+//                                               return AlertDialog(
+//                                                 title: const Text(
+//                                                     'No Categories Selected'),
+//                                                 content: const Text(
+//                                                     'Please select categories to delete.'),
+//                                                 actions: <Widget>[
+//                                                   TextButton(
+//                                                     onPressed: () {
+//                                                       Navigator.of(context)
+//                                                           .pop(); // Close the dialog
+//                                                     },
+//                                                     child: Text('OK'),
+//                                                   ),
+//                                                 ],
+//                                               );
+//                                             },
+//                                           );
+//                                         }
+//                                       },
+//                                       // You might want to refresh the UI or handle any other updates
+
+//                                       child: isloadingD
+//                                           ? Text("wait")
+//                                           : Text('Delete Selected Categories'),
+//                                     ),
+//                                   ],
+//                                 ),
+//                               );
+//                             }).toList(),
+//                           ),
+//                           const SizedBox(
+//                             width: double.infinity,
+//                           ),
+//                           // const Divider(),
+//                         ],
+//                       ),
+//                     ),
+//                   );
+//                 }).toList(),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
